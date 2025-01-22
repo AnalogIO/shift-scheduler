@@ -54,6 +54,10 @@ jobs:
             release_name_macos="aion-cli-$tag-macos"
             cd bin/darwin && tar -czvf $release_name_macos.tar.gz aion-cli && cd ../..
 
+            GOOS=darwin GOARCH=arm64 go build -o bin/darwin_arm/aion-cli
+            release_name_macos_arm="aion-cli-$tag-macos-aarch64"
+            cd bin/darwin_arm && tar -czvf $release_name_macos_arm.tar.gz aion-cli && cd ../..
+
             GOOS=windows GOARCH=amd64 go build -o bin/windows/aion-cli.exe
             release_name_windows="aion-cli-$tag-windows"
             cd bin/windows && tar -czvf $release_name_windows.tar.gz aion-cli.exe && cd ../..
@@ -74,6 +78,7 @@ jobs:
                  bin/linux/*.tar.gz
                  bin/darwin/*.tar.gz
                  bin/windows/*.tar.gz
+                 bin/darwin_arm/*.tar.gz
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
