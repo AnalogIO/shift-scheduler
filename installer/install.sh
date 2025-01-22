@@ -52,7 +52,7 @@ fi
 
 # Move the binary to the current directory
 read -p "Enter the directory to move the binary to (default: /usr/local/bin/${p_name}): " target_dir
-target_dir=${target_dir:-/usr/local/bin/${p_name}}
+target_dir=${target_dir:-/usr/local/bin/$p_name}
 
 if [ ! -d "$(dirname "$target_dir")" ]; then
     echo "Directory does not exist: $(dirname "$target_dir")"
