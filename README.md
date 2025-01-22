@@ -94,6 +94,12 @@ $ aion-cli config formID abcdefg
 Latest aion-cli CLI binary  
 Python 3 or later (used for gurobi solver)  
   
+### Install script
+The install script will download the latest release of the program and install it to your system. It uses the default binary location on your system but will ask you if you would like it to go somewhere else.
+```
+$ curl -s https://raw.githubusercontent.com/Slug-Boi/aion-cli/master/installer/install.sh | bash
+```
+
 
 ### Manual installation
 To install the program you just need to run the binary file. For ease of use you can create an alias in your shell rc file or powershell profile
