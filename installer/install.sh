@@ -8,6 +8,11 @@ __cleanup ()
     if [ -n "$file" ]; then
         rm $file 2>/dev/null
     fi
+    base=$(basename $(pwd))
+    parent=$(dirname $(pwd))
+    if [ "$base" != "installer" ] || [ "$parent" != "aion-cli" ]; then
+        rm install.sh 2>/dev/null
+    fi
 }
 
 trap __cleanup EXIT
