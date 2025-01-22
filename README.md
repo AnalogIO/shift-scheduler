@@ -97,7 +97,7 @@ Python 3 or later (used for gurobi solver)
 ### Install script
 The install script will download the latest release of the program and install it to your system. It uses the default binary location on your system but will ask you if you would like it to go somewhere else.
 ```
-$ curl -s https://raw.githubusercontent.com/Slug-Boi/aion-cli/master/installer/install.sh | bash
+curl -s https://raw.githubusercontent.com/Slug-Boi/aion-cli/master/installer/install.sh | bash
 ```
 
 
