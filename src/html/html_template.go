@@ -95,6 +95,8 @@ func gurobiWebData(args []string, sorterMethod string) ([]WebData, string) {
 		webData = append(webData, WebData{GroupNumber: group, Timeslot: timeslotTrimmed, Day: timeslotStr[1], Date: timeslotStr[0], WishLevel: wishLevels[group], Path: "Gurobi does not support paths", PathCost: groupTimeslotCost[group+timeslot]})
 	}
 
+	fmt.Printf("TEST %+v",webData)
+
 	// sort by group number using natural sorting
 	webData = sorter(webData, sorterMethod)
 
@@ -107,9 +109,10 @@ func sorter(webData []WebData, sortMethod string) []WebData {
 		// time.Parse layout string
 		layouts := []string{"02-01-06 Monday 15:04", "02-01-2006 Monday 15:04", "02-01-06 Mon 15:04", "02-01-2006 Mon 15:04"}
 		layout := ""
+		trimmed := strings.Trim(webData[0].Date+" "+webData[0].Day+" "+strings.Split(webData[0].Timeslot, "-")[0], "\"'()!@#$%^&*[]")
 		// figure out which layout to use for the time.Parse
 		for i := 0; i < len(layouts); i++ {
-			timetest, _ := time.Parse(layouts[i], webData[0].Date+" "+webData[0].Day+" "+strings.Split(webData[0].Timeslot, "-")[0])
+			timetest, _ := time.Parse(layouts[i], trimmed)
 			if timetest.String() != "0001-01-01 00:00:00 +0000 UTC" {
 				layout = layouts[i]
 				break
@@ -117,12 +120,14 @@ func sorter(webData []WebData, sortMethod string) []WebData {
 		}
 		// if no layout was found, panic
 		if layout == "" {
-			Sugar.Panic("Could not find a suitable layout for time.Parse. Data timeslot format is not supported.")
+			Sugar.Panic("Could not find a suitable layout for time.Parse. Data timeslot format is not supported.\n", trimmed)
 		}
 		// sort by timeslot using time.Parse and time.Before
 		sort.Slice(webData, func(i, j int) bool {
-			t1, _ := time.Parse(layout, webData[i].Date+" "+webData[i].Day+" "+strings.Split(webData[i].Timeslot, "-")[0])
-			t2, _ := time.Parse(layout, webData[j].Date+" "+webData[j].Day+" "+strings.Split(webData[j].Timeslot, "-")[0])
+			trim1 := strings.Trim(webData[i].Date+" "+webData[i].Day+" "+strings.Split(webData[i].Timeslot, "-")[0], "\"'()!@#$%^&*[]")
+			trim2 := strings.Trim(webData[j].Date+" "+webData[j].Day+" "+strings.Split(webData[j].Timeslot, "-")[0], "\"'()!@#$%^&*[]")
+			t1, _ := time.Parse(layout, trim1)
+			t2, _ := time.Parse(layout, trim2)
 			return t1.Before(t2)
 		})
 	} else if sortMethod == "group_number" {
