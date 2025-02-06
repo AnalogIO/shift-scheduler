@@ -9,7 +9,13 @@ This should be followed by a lottery string which will be used to assign pseudo 
 ![lottery string](img/lotterystring.png)
 
 ## Second
-All following pages and sections should be formatted like so with a section description and 1 or more multiple choice grids. 1 Section can hold up to 7 multiple choice grids for each day of the week
+All following pages and sections should be formatted like so with a section description and 1 or more multiple choice grids. 1 Section can hold up to 7 multiple choice grids for each day of the week  
+!!! IMPORTANT: Please make sure to format the date that is the name of the section to one of these formats:
+- dd-mm-yy Day_Long [timestart-timeend] e.g. 12-02-21 Monday [09:00-10:00]
+- dd-mm-yyyy Day_Long [timestart-timeend] e.g. 12-02-2021 Monday [09:00-10:00]
+- dd-mm-yy Day_Short [timestart-timeend] e.g. 12-02-21 Mon [09:00-10:00]
+- dd-mm-yyyy Day_Short [timestart-timeend] e.g. 12-02-2021 Mon [09:00-10:00]  
+
 ![options for days](img/choicesections.png)
 
 # Google Sheets setup
