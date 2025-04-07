@@ -127,8 +127,14 @@ func sorter(webData []WebData, sortMethod string) []WebData {
 		sort.Slice(webData, func(i, j int) bool {
 			trim1 := strings.Trim(webData[i].Date+" "+webData[i].Day+" "+strings.Split(webData[i].Timeslot, "-")[0], trimString)
 			trim2 := strings.Trim(webData[j].Date+" "+webData[j].Day+" "+strings.Split(webData[j].Timeslot, "-")[0], trimString)
-			t1, _ := time.Parse(layout, trim1)
-			t2, _ := time.Parse(layout, trim2)
+			t1, err := time.Parse(layout, trim1)
+			if err != nil {
+				Sugar.Error(err)
+			}
+			t2, err := time.Parse(layout, trim2)
+			if err != nil {
+				Sugar.Error(err)
+			}
 			return t1.Before(t2)
 		})
 	} else if sortMethod == "group_number" {
