@@ -39,6 +39,7 @@ func TranslateGurobi(data []forms.Form) (string, string, map[string]forms.Form, 
 	// Get the string of all group inputs and the cache
 	allStrings := graph.BaseHashString(data, sb)
 
+
 	// Create string builders for two return strings
 	sbGroups := strings.Builder{}
 	sbTimeslots := strings.Builder{}
