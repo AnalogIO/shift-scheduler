@@ -109,7 +109,8 @@ func sorter(webData []WebData, sortMethod string) []WebData {
 		// time.Parse layout string
 		layouts := []string{"02-01-06 Monday 15:04", "02-01-2006 Monday 15:04", "02-01-06 Mon 15:04", "02-01-2006 Mon 15:04"}
 		layout := ""
-		trimmed := strings.Trim(webData[0].Date+" "+webData[0].Day+" "+strings.Split(webData[0].Timeslot, "-")[0], "\"'()!@#$%^&*[]")
+		trimString := "\"'()!@#$%^&*[] "
+		trimmed := strings.Trim(webData[0].Date+" "+webData[0].Day+" "+strings.Split(webData[0].Timeslot, "-")[0], trimString)
 		// figure out which layout to use for the time.Parse
 		for i := 0; i < len(layouts); i++ {
 			timetest, _ := time.Parse(layouts[i], trimmed)
@@ -124,8 +125,8 @@ func sorter(webData []WebData, sortMethod string) []WebData {
 		}
 		// sort by timeslot using time.Parse and time.Before
 		sort.Slice(webData, func(i, j int) bool {
-			trim1 := strings.Trim(webData[i].Date+" "+webData[i].Day+" "+strings.Split(webData[i].Timeslot, "-")[0], "\"'()!@#$%^&*[]")
-			trim2 := strings.Trim(webData[j].Date+" "+webData[j].Day+" "+strings.Split(webData[j].Timeslot, "-")[0], "\"'()!@#$%^&*[]")
+			trim1 := strings.Trim(webData[i].Date+" "+webData[i].Day+" "+strings.Split(webData[i].Timeslot, "-")[0], trimString)
+			trim2 := strings.Trim(webData[j].Date+" "+webData[j].Day+" "+strings.Split(webData[j].Timeslot, "-")[0], trimString)
 			t1, _ := time.Parse(layout, trim1)
 			t2, _ := time.Parse(layout, trim2)
 			return t1.Before(t2)
