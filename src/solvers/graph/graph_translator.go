@@ -2,18 +2,31 @@ package graph
 
 import (
 	"hash/fnv"
+	"encoding/json"
+	// "fmt"
 	"math/rand"
+	"os"
 	"regexp"
 	"sort"
+	// "strconv"
 	"strings"
 
 	"github.com/Slug-Boi/aion-cli/src/forms"
 )
 
+type debug_data struct {
+	Group_number string `json:"group_number"`
+	Timeslot     map[string]string `json:"timeslot"`
+	Hash_string map[string]string `json:"hash_string"`
+	Hash_value map[string]uint32 `json:"hash_value"`
+	Cost 	  map[string]float64 `json:"cost"`
+}
+
 // Translates data from the forms package to the graph package
 func Translate(data []forms.Form) ([]Edge, int, map[int]forms.Form, map[int]string, map[string]float64) {
 	// Create a map to store the user node to user data
 	nodeToUser := map[int]forms.Form{}
+	db_list := []debug_data{}
 
 	// Timeslot node to Unix Time map (First value is starting time and second value is ending time)
 	nodeToTime := map[int]string{}
@@ -31,7 +44,7 @@ func Translate(data []forms.Form) ([]Edge, int, map[int]forms.Form, map[int]stri
 
 	// Sort users by HashString to ensure consistent ordering when generating the concatenated string
 	sort.Slice(data, func(i, j int) bool {
-		return data[i].HashString < data[j].HashString
+		return data[i].GroupNumber < data[j].GroupNumber
 	})
 
 	// Create base string for creating heuristic
@@ -44,6 +57,14 @@ func Translate(data []forms.Form) ([]Edge, int, map[int]forms.Form, map[int]stri
 
 	// Translate participants to source linked nodes
 	for i, participant := range data {
+		// create debug data frame
+		db := debug_data{
+			Group_number: participant.GroupNumber,
+			Timeslot:     map[string]string{},
+			Hash_string:  map[string]string{},
+			Hash_value:   map[string]uint32{},
+			Cost:         map[string]float64{},
+		}
 
 		// Add edge from source to participant
 		graph = append(graph, Edge{From: 0, To: userNodeInc, Capacity: 1, Cost: 0})
@@ -76,15 +97,23 @@ func Translate(data []forms.Form) ([]Edge, int, map[int]forms.Form, map[int]stri
 		// Add edge from participant to timeslot
 		//TODO: Check that this still works now that caps is map and not a float slice
 		for timeslot := range participant.Votes {
-			heuristic := HashHeuristic(participant.GroupNumber, timeslot, allStrings)
+			heuristic, hash := HashHeuristic(participant.GroupNumber, timeslot, allStrings)
 			groupTimeslotCost[participant.GroupNumber+timeslot] = caps[timeslot]/sumCap + heuristic
 			graph = append(graph, Edge{From: userNodeInc, To: timeToNode[timeslot], Capacity: 1, Cost: (caps[timeslot] / sumCap) + heuristic})
 			timeslotNodeInc++
+
+			//Add debug data
+			db.Timeslot[timeslot] = timeslot
+			db.Hash_string[timeslot] = participant.GroupNumber + timeslot + allStrings
+			db.Cost[timeslot] = groupTimeslotCost[participant.GroupNumber+timeslot]
+			db.Hash_value[timeslot] = hash
 		}
 
 		if i != len(data)-1 {
 			timeslotNodeInc = intialTimeslotNodeInc
 		}
+
+		db_list = append(db_list, db)
 
 		// Add user to map and increment user node
 		nodeToUser[userNodeInc] = participant
@@ -95,11 +124,18 @@ func Translate(data []forms.Form) ([]Edge, int, map[int]forms.Form, map[int]stri
 	for i := intialTimeslotNodeInc; i < timeslotNodeInc; i++ {
 		graph = append(graph, Edge{From: i, To: timeslotNodeInc, Capacity: 1, Cost: 0})
 	}
+	//TODO: add if statement for debug data save as json
+	db_data, _ := json.Marshal(db_list)
+	err := os.WriteFile("debug_data.json", db_data, 0644)
+	if err != nil {
+		panic("cannot write debug data to file")
+	}
+
 	return graph, timeslotNodeInc, nodeToUser, nodeToTime, groupTimeslotCost
 }
 
 // TODO: Figure out if this is doable with a rolling hash function
-func HashHeuristic(groupName, timeslot, FullHash string) float64 {
+func HashHeuristic(groupName, timeslot, FullHash string) (float64,uint32) {
 	// Combine the two hash strings from input
 	combined_str := groupName + timeslot + FullHash
 
@@ -107,9 +143,15 @@ func HashHeuristic(groupName, timeslot, FullHash string) float64 {
 	combined := []byte(combined_str)
 
 	// Create hash value of 32 bits
-	hasher := fnv.New32a()
+	hasher := fnv.New32()
 	hasher.Write(combined)
 	hash := hasher.Sum32()
+
+
+	// hash, err := strconv.ParseInt(formated_hash[:8], 16, 64)
+	// if err != nil {
+	// 	panic(fmt.Sprintf("cannot convert hash to int", err, hash_hex))
+	// }
 
 	// The hash is used to seed the random number generator resulting in the same number every time
 	random := rand.New(rand.NewSource(int64(hash)))
@@ -131,7 +173,7 @@ func HashHeuristic(groupName, timeslot, FullHash string) float64 {
 
 	//float := math.Float64frombits(parsed)
 
-	return random_float
+	return random_float, hash
 }
 
 // Generates a base string for hashing the heuristic
