@@ -116,13 +116,13 @@ func TestGraphTranslation(t *testing.T) {
 
 func TestHashHeuristic(t *testing.T) {
 	// Check hash heuristic
-	heuristic := graph.HashHeuristic("Group 4", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5")
+	heuristic, hash1 := graph.HashHeuristic("Group 4", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5")
 
 	if heuristic > 0.00005 {
 		t.Error("Expected something greater than 0 heuristic, got", heuristic)
 	}
 
-	heuristic2 := graph.HashHeuristic("Group 5", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5")
+	heuristic2, _ := graph.HashHeuristic("Group 5", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5")
 	if heuristic2 > 0.00005 {
 		t.Error("Expected something greater than 0 heuristic2, got", heuristic)
 	}
@@ -130,11 +130,21 @@ func TestHashHeuristic(t *testing.T) {
 		t.Error("heuristic and heuristic2 are equal to the same\nHeuristic:", heuristic, "\nHeuristic2:", heuristic2)
 	}
 
+	// Check hash value is the same between runs
+
+	_, hash2 := graph.HashHeuristic("Group 4", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5")
+
+	if hash1 != hash2 {
+		t.Error("Expected hash values to be the same, got", hash1, hash2)
+	}
+	
 }
 
 func TestHeuristicLargerThan1(t *testing.T) {
 	// Check hash heuristic
-	heuristic := graph.HashHeuristic("Group 4", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5") + 1.0
+	heuristic, _ := graph.HashHeuristic("Group 4", "12-04-24 Monday [8:00-10:00]", "Group 4Group 5")
+
+	heuristic += 1.0	
 
 	if heuristic <= 1 {
 		t.Error("Expected heuristic to be larger than 1:", heuristic)
@@ -177,8 +187,8 @@ func TestGraphTieBreaking(t *testing.T) {
 
 	sb := strings.Builder{}
 	allStrings := graph.BaseHashString(form, sb)
-	heur1 := graph.HashHeuristic(usersSlice[0].GroupNumber, usersSlice[0].Votes["12-04-24 Monday [8:00-10:00]"], allStrings)
-	heur2 := graph.HashHeuristic(users[1].GroupNumber, usersSlice[0].Votes["12-04-24 Monday [8:00-10:00]"], allStrings)
+	heur1, _ := graph.HashHeuristic(usersSlice[0].GroupNumber, usersSlice[0].Votes["12-04-24 Monday [8:00-10:00]"], allStrings)
+	heur2, _ := graph.HashHeuristic(users[1].GroupNumber, usersSlice[0].Votes["12-04-24 Monday [8:00-10:00]"], allStrings)
 
 	// Check that heuristic 2 is lesser than heuristic 1
 	if heur1 < heur2 {
